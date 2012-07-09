@@ -1,4 +1,4 @@
-package nu.ganslandt.util.requestlog;
+package nu.ganslandt.util.commlog;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,7 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/** CommLog implementation. */
+/**
+ * CommLog implementation.
+ */
 public class CommLogImpl implements CommLog, StringerSource {
 
     private static Map<String, CommLog> loggers = new ConcurrentHashMap<String, CommLog>();
@@ -46,7 +48,7 @@ public class CommLogImpl implements CommLog, StringerSource {
 
     @Override
     public boolean hasStringerFor(Object obj) {
-        return (getSpecializedStringerFor(obj) != null);
+        return getSpecializedStringerFor(obj) != null;
     }
 
     @Override
@@ -57,7 +59,7 @@ public class CommLogImpl implements CommLog, StringerSource {
 
         if (stringer == null)
             // fall back to basics
-            stringer = new BasicObjectStringer(this);
+            stringer = new ReflectingPropertyStringer(this);
 
         return stringer;
     }

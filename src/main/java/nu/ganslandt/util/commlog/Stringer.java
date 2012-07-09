@@ -1,4 +1,4 @@
-package nu.ganslandt.util.requestlog;
+package nu.ganslandt.util.commlog;
 
 public interface Stringer {
 

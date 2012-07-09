@@ -1,4 +1,4 @@
-package nu.ganslandt.util.requestlog;
+package nu.ganslandt.util.commlog;
 
 /**
  * Communication logger that logs incoming requests and maps them to their respective responses or errors.
@@ -16,7 +16,9 @@ public interface CommLog {
      */
     void request(String requestName, Object request);
 
-    /** Logs an empty response and maps it to a preceding request. */
+    /**
+     * Logs an empty response and maps it to a preceding request.
+     */
     void response();
 
     /**

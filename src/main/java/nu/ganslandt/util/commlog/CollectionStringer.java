@@ -1,4 +1,4 @@
-package nu.ganslandt.util.requestlog;
+package nu.ganslandt.util.commlog;
 
 import java.util.Collection;
 
@@ -19,17 +19,17 @@ public class CollectionStringer implements Stringer {
         else
             throw new IllegalArgumentException("CollectionStringer can only string Collections.");
 
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder builder = new StringBuilder();
 
-        buffer.append("[");
+        builder.append("[");
         for (Object item : collection) {
-            buffer.append(source.getStringer(item).toString(item));
-            buffer.append(", ");
+            builder.append(source.getStringer(item).toString(item));
+            builder.append(", ");
         }
 
-        buffer.delete(buffer.length() - 2, buffer.length());
-        buffer.append("]");
+        builder.delete(builder.length() - 2, builder.length());
+        builder.append("]");
 
-        return buffer.toString();
+        return builder.toString();
     }
 }

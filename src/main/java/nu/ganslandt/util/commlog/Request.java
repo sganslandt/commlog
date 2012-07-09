@@ -1,8 +1,10 @@
-package nu.ganslandt.util.requestlog;
+package nu.ganslandt.util.commlog;
 
 import java.util.UUID;
 
-/** Represents incoming request and keeps track of the request name and it's unique id. */
+/**
+ * Represents incoming request and keeps track of the request name and it's unique id.
+ */
 public class Request {
 
     private String requestName;

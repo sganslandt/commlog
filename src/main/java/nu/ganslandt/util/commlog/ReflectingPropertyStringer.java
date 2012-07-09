@@ -1,18 +1,18 @@
-package nu.ganslandt.util.requestlog;
+package nu.ganslandt.util.commlog;
 
 import java.lang.reflect.Field;
 
-public class BasicObjectStringer implements Stringer {
+public class ReflectingPropertyStringer implements Stringer {
 
     private StringerSource source;
 
-    protected BasicObjectStringer(StringerSource source) {
+    protected ReflectingPropertyStringer(StringerSource source) {
         this.source = source;
     }
 
     public String toString(Object obj) {
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         Package thisPackage = obj.getClass().getPackage();
 
         sb.append("{");
