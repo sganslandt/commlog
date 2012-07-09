@@ -1,2 +1,2 @@
-requestlog
+commlog
 ========

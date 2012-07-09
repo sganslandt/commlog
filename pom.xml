@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>nu.ganslandt.util</groupId>
-    <artifactId>requestlog</artifactId>
+    <artifactId>commlog</artifactId>
     <version>0.1-SNAPSHOT</version>
 
     <properties>
