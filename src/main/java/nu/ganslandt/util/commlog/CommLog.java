@@ -37,4 +37,6 @@ public interface CommLog {
      *             comm log, otherwise only the stacktrace will be logged in the error log.
      */
     void error(Throwable t, boolean comm);
+
+    void request(String requestName);
 }
