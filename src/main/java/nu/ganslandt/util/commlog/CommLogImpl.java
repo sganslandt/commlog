@@ -86,6 +86,7 @@ public class CommLogImpl implements CommLog, StringerSource {
         if (stringerMap.get() == null) {
             stringerMap.set(new HashMap<Class, Stringer>());
             stringerMap.get().put(Collection.class, new CollectionStringer(this));
+            stringerMap.get().put(String.class, new ToStringStringer());
         }
     }
 
