@@ -3,8 +3,8 @@ package nu.ganslandt.util.commlog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Constructor;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,12 +13,13 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class CommLogImpl implements CommLog, StringerSource {
 
-    private static Map<String, CommLog> loggers = new ConcurrentHashMap<String, CommLog>();
+    private static Map<String, CommLogImpl> loggers = new ConcurrentHashMap<String, CommLogImpl>();
 
     private final Logger COMM;
     private final Logger ERROR;
 
-    private ThreadLocal<Map<Class, Stringer>> stringerMap = new ThreadLocal<Map<Class, Stringer>>();
+    private Map<Class, Stringer> stringerMap;
+    private Map<String, Stringer> packageNameStringerMap;
 
     private ThreadLocal<Request> request;
 
@@ -26,6 +27,10 @@ public class CommLogImpl implements CommLog, StringerSource {
         this.COMM = LoggerFactory.getLogger(name + "Comm");
         this.ERROR = LoggerFactory.getLogger(name + "Error");
         this.request = new ThreadLocal<Request>();
+
+        stringerMap = new ConcurrentHashMap<Class, Stringer>();
+        packageNameStringerMap = new ConcurrentHashMap<String, Stringer>();
+
     }
 
     /**
@@ -36,13 +41,14 @@ public class CommLogImpl implements CommLog, StringerSource {
      * @return A CommLog instance.
      */
     public static CommLog getLog(String name) {
-        CommLog log = loggers.get(name);
+        CommLogImpl log = loggers.get(name);
 
         if (log == null) {
             log = new CommLogImpl(name);
             loggers.put(name, log);
         }
 
+        log.initStringerMap();
         return log;
     }
 
@@ -53,58 +59,103 @@ public class CommLogImpl implements CommLog, StringerSource {
 
     @Override
     public Stringer getStringer(Object obj) {
-        initStringerMap();
+
+        if (obj == null)
+            return new ToStringStringer();
 
         Stringer stringer = getSpecializedStringerFor(obj);
+        if (stringer != null)
+            return stringer;
 
-        if (stringer == null)
-            // fall back to basics
-            stringer = new ReflectingPropertyStringer(this);
+        stringer = getSpecializedStringerForPackage(obj.getClass().getPackage().getName());
+        if (stringer != null)
+            return stringer;
 
-        return stringer;
+        // fall back to basics
+        return new ToStringStringer();
     }
 
     private Stringer getSpecializedStringerFor(Object obj) {
-        Stringer stringer;
+
+        if (obj.getClass().isArray())
+            return new ArrayStringer(this);
 
         // try getting based on this class
-        stringer = stringerMap.get().get(obj.getClass());
+        Stringer stringer = stringerMap.get(obj.getClass());
 
         // else try to find by super class
         if (stringer == null)
-            for (Class c : stringerMap.get().keySet()) {
+            for (Class c : stringerMap.keySet()) {
                 if (c.isAssignableFrom(obj.getClass())) {
-                    stringer = stringerMap.get().get(c);
-                    //add a reference for this particular subclass
-                    stringerMap.get().put(obj.getClass(), stringer);
+                    stringer = stringerMap.get(c);
+                    //add a reference for this particular subclass - why?
+//                    stringerMap.get().put(obj.getClass(), stringer);
                 }
             }
+
         return stringer;
     }
 
-    private void initStringerMap() {
-        if (stringerMap.get() == null) {
-            stringerMap.set(new HashMap<Class, Stringer>());
-            stringerMap.get().put(Collection.class, new CollectionStringer(this));
-            stringerMap.get().put(String.class, new ToStringStringer());
-        }
+    private Stringer getSpecializedStringerForPackage(String packageName) {
+        return packageNameStringerMap.get(packageName);
     }
 
-    /** @inheritDoc */
+    private void initStringerMap() {
+        stringerMap.put(Collection.class, new CollectionStringer(this));
+        stringerMap.put(Map.class, new MapStringer(this));
+    }
+
+    /**
+     * @inheritDoc
+     */
     @Override
     public void request(String requestName, Object request) {
         this.request.set(new Request(requestName));
         COMM.info("Request: [{}] {}({})", new Object[]{this.request.get().getUUID(), requestName, getStringer(request).toString(request)});
     }
 
-    /** @inheritDoc */
+    /**
+     * @inheritDoc
+     */
     @Override
     public void request(String requestName) {
         this.request.set(new Request(requestName));
         COMM.info("Request: [{}] {}()", new Object[]{this.request.get().getUUID(), requestName});
     }
 
-    /** @inheritDoc */
+    @Override
+    public void configureStringerForClass(Class clazz, Class<? extends Stringer> stringerClass) {
+        stringerMap.put(clazz, getConfiguredStringer(stringerClass));
+    }
+
+    @Override
+    public void configureStringerForPackage(String packageName, Class<? extends Stringer> stringerClass) {
+        packageNameStringerMap.put(packageName, getConfiguredStringer(stringerClass));
+    }
+
+    private Stringer getConfiguredStringer(Class<? extends Stringer> stringerClass) {
+        Stringer stringer = null;
+        for (Map.Entry<Class, Stringer> e : stringerMap.entrySet()) {
+            if (e.getValue().getClass().equals(stringerClass)) {
+                stringer = e.getValue();
+            }
+        }
+
+        if (stringer == null) {
+            Constructor<?> constructor = stringerClass.getDeclaredConstructors()[0];
+            try {
+                stringer = (Stringer) constructor.newInstance(this);
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return stringer;
+    }
+
+    /**
+     * @inheritDoc
+     */
     @Override
     public void response() {
         Request request = this.request.get();
@@ -123,7 +174,9 @@ public class CommLogImpl implements CommLog, StringerSource {
         COMM.info("Response: [{}] {}({})", new Object[]{uuid, requestName, "void"});
     }
 
-    /** @inheritDoc */
+    /**
+     * @inheritDoc
+     */
     @Override
     public void response(Object response) {
         Request request = this.request.get();
@@ -142,7 +195,9 @@ public class CommLogImpl implements CommLog, StringerSource {
         COMM.info("Response: [{}] {}({})", new Object[]{uuid, requestName, getStringer(response).toString(response)});
     }
 
-    /** @inheritDoc */
+    /**
+     * @inheritDoc
+     */
     @Override
     public void error(Throwable t, boolean comm) {
         String uuid = null;

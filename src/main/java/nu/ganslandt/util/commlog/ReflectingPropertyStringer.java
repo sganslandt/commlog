@@ -13,7 +13,6 @@ public class ReflectingPropertyStringer implements Stringer {
     public String toString(Object obj) {
 
         StringBuilder sb = new StringBuilder();
-        Package thisPackage = obj.getClass().getPackage();
 
         sb.append("{");
 
@@ -22,10 +21,10 @@ public class ReflectingPropertyStringer implements Stringer {
 
             try {
                 f.setAccessible(true);
-                if (f.get(obj) != null && (thisPackage.equals(f.get(obj).getClass().getPackage()) || source.hasStringerFor(f.get(obj))))
+                if (f.get(obj) != null)
                     value = f.getName() + "=" + source.getStringer(f.get(obj)).toString(f.get(obj));
                 else
-                    value = f.getName() + "=" + f.get(obj);
+                    value = f.getName() + "=" + null;
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
                 value = "###ERROR###";

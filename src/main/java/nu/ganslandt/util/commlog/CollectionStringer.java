@@ -27,7 +27,8 @@ public class CollectionStringer implements Stringer {
             builder.append(", ");
         }
 
-        builder.delete(builder.length() - 2, builder.length());
+        if (builder.length() >= 2)
+            builder.delete(builder.length() - 2, builder.length());
         builder.append("]");
 
         return builder.toString();

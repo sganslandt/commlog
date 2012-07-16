@@ -39,4 +39,8 @@ public interface CommLog {
     void error(Throwable t, boolean comm);
 
     void request(String requestName);
+
+    void configureStringerForClass(Class clazz, Class<? extends Stringer> stringerClass);
+
+    void configureStringerForPackage(String packageName, Class<? extends Stringer> stringerClass);
 }
