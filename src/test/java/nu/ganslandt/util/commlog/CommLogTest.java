@@ -3,6 +3,7 @@ package nu.ganslandt.util.commlog;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
@@ -168,7 +169,7 @@ public class CommLogTest {
     }
 
     @Test
-    public void testToStringString_primitives() {
+    public void testStringify_primitives() {
         int intPrimitive = 123;
         String s = commLog.getStringer(intPrimitive).toString(intPrimitive);
         assertEquals("123", s);
@@ -181,4 +182,18 @@ public class CommLogTest {
         s = commLog.getStringer(doublePrimitive).toString(doublePrimitive);
         assertEquals("1.23", s);
     }
+
+    @Test
+    public void testStringifyURI_getsCorrectStringRepresentation() {
+        URI uri = URI.create("http://host/path?queryParam=paramValue&queryParam2=paramValue2");
+
+        assertEquals("Invalid precondition, failed to parse URI string?", "http", uri.getScheme());
+        assertEquals("Invalid precondition, failed to parse URI string?", "host", uri.getHost());
+        assertEquals("Invalid precondition, failed to parse URI string?", "/path", uri.getPath());
+        assertEquals("Invalid precondition, failed to parse URI string?", "queryParam=paramValue&queryParam2=paramValue2", uri.getQuery());
+
+        String s = commLog.getStringer(uri).toString(uri);
+        assertEquals("http://host/path?queryParam=paramValue&queryParam2=paramValue2", s);
+    }
+
 }
