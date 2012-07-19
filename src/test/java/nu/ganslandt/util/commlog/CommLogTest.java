@@ -32,7 +32,7 @@ public class CommLogTest {
 
         String s = commLog.getStringer(integer).toString(integer);
 
-        assertEquals("'" + 10 + "'", s);
+        assertEquals("10", s);
     }
 
     @Test
@@ -83,7 +83,7 @@ public class CommLogTest {
 
         String s = commLog.getStringer(value).toString(value);
 
-        assertEquals("{value1='abc', value2='123', optionalNestedValue={value1='def', value2='456', optionalNestedValue=null}}" ,s);
+        assertEquals("{value1='abc', value2=123, optionalNestedValue={value1='def', value2=456, optionalNestedValue=null}}" ,s);
     }
 
     @Test
@@ -93,7 +93,7 @@ public class CommLogTest {
 
         String s = commLog.getStringer(value).toString(value);
 
-        assertEquals("{value1='abc', value2='123', optionalNestedValue={value1='def', value2='456', optionalNestedValue=null}}" ,s);
+        assertEquals("{value1='abc', value2=123, optionalNestedValue={value1='def', value2=456, optionalNestedValue=null}}" ,s);
     }
 
     @Test
@@ -151,7 +151,7 @@ public class CommLogTest {
 
         String s = commLog.getStringer(objects).toString(objects);
 
-        assertEquals("['abc', '123', '1.23']", s);
+        assertEquals("['abc', 123, 1.23]", s);
     }
 
     @Test
@@ -164,6 +164,21 @@ public class CommLogTest {
 
         String s = commLog.getStringer(objects).toString(objects);
 
-        assertEquals("['abc', {value1='abc', value2='123', optionalNestedValue=null}]", s);
+        assertEquals("['abc', {value1='abc', value2=123, optionalNestedValue=null}]", s);
+    }
+
+    @Test
+    public void testToStringString_primitives() {
+        int intPrimitive = 123;
+        String s = commLog.getStringer(intPrimitive).toString(intPrimitive);
+        assertEquals("123", s);
+
+        boolean boolPrimitive = true;
+        s = commLog.getStringer(boolPrimitive).toString(boolPrimitive);
+        assertEquals("true", s);
+
+        double doublePrimitive = 1.23;
+        s = commLog.getStringer(doublePrimitive).toString(doublePrimitive);
+        assertEquals("1.23", s);
     }
 }

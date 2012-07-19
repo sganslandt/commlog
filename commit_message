@@ -1,6 +1,1 @@
-*  Added ArrayStringer which makes use of the existing CollectionStringer.
-*  Added possibility to configure which stringer is used for a particular class or package.
-*  Add MapStringer
-*  ToStringStringer is a more sane default
-*  Fixed a few bugs.
-*  ... and added some tests.
+*  Only put '' around Strings.
