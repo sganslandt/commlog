@@ -24,8 +24,8 @@ public class CommLogImpl implements CommLog, StringerSource {
     private ThreadLocal<Request> request;
 
     private CommLogImpl(String name) {
-        this.COMM = LoggerFactory.getLogger(name + "Comm");
-        this.ERROR = LoggerFactory.getLogger(name + "Error");
+        this.COMM = LoggerFactory.getLogger(name + "-Comm");
+        this.ERROR = LoggerFactory.getLogger(name + "-Error");
         this.request = new ThreadLocal<Request>();
 
         stringerMap = new ConcurrentHashMap<Class, Stringer>();
