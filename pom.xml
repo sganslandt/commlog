@@ -64,15 +64,15 @@
     </build>
 
     <distributionManagement>
-        <repository>
-            <id>repository.ganslandt.nu</id>
-            <name>release.repository.ganslandt.nu</name>
-            <url>http://home.ganslandt.nu:8080/artifactory/snapshot</url>
-        </repository>
         <snapshotRepository>
-            <id>repository.ganslandt.nu</id>
-            <name>snapshot.repository.ganslandt.nu</name>
-            <url>http://home.ganslandt.nu:8080/artifactory/snapshot</url>
+            <id>artifactory1</id>
+            <name>artifactory1-snapshots</name>
+            <url>http://maven.casumotest.local/sganslandt-snapshot</url>
         </snapshotRepository>
+        <repository>
+            <id>artifactory1</id>
+            <name>artifactory1-releases</name>
+            <url>http://maven.casumotest.local/sganslandt-release</url>
+        </repository>
     </distributionManagement>
 </project>
