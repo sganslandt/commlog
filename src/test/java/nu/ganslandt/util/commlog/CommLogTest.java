@@ -169,6 +169,23 @@ public class CommLogTest {
     }
 
     @Test
+    public void testArrayStringer_withPrimitiveArrays() {
+        testArrayStringer_withPrimitiveArray(new char[]{'1', '2'}, "[1, 2]");
+        testArrayStringer_withPrimitiveArray(new byte[]{1, 2}, "[1, 2]");
+        testArrayStringer_withPrimitiveArray(new short[]{1, 2}, "[1, 2]");
+        testArrayStringer_withPrimitiveArray(new int[]{1, 2}, "[1, 2]");
+        testArrayStringer_withPrimitiveArray(new long[]{1, 2}, "[1, 2]");
+        testArrayStringer_withPrimitiveArray(new float[]{1, 2}, "[1.0, 2.0]");
+        testArrayStringer_withPrimitiveArray(new double[]{1, 2}, "[1.0, 2.0]");
+        testArrayStringer_withPrimitiveArray(new boolean[]{true, false}, "[true, false]");
+    }
+
+    private void testArrayStringer_withPrimitiveArray(Object array, String expectedResult) {
+        String s = commLog.getStringer(array).toString(array);
+        assertEquals(expectedResult, s);
+    }
+
+    @Test
     public void testStringify_primitives() {
         int intPrimitive = 123;
         String s = commLog.getStringer(intPrimitive).toString(intPrimitive);
