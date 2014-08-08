@@ -97,4 +97,9 @@ public class ArrayStringer implements Stringer {
 
         return characterCollection;
     }
+
+    @Override
+    public void addSecret(final String propertyName) {
+        // Don't know about property names, nothing to do.
+    }
 }

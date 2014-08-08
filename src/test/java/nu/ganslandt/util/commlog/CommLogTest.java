@@ -16,6 +16,7 @@ public class CommLogTest {
     @Before
     public void setup() {
         commLog = (CommLogImpl) CommLogImpl.getLog("TestLog");
+        commLog.addSecret("secretProperty"); // If the secret doesn't show up anywhere, nothing should change
     }
 
     @Test
@@ -84,7 +85,7 @@ public class CommLogTest {
 
         String s = commLog.getStringer(value).toString(value);
 
-        assertEquals("{value1='abc', value2=123, optionalNestedValue={value1='def', value2=456, optionalNestedValue=null}}" ,s);
+        assertEquals("{value1='abc', value2=123, optionalNestedValue={value1='def', value2=456, optionalNestedValue=null}}", s);
     }
 
     @Test
@@ -94,7 +95,7 @@ public class CommLogTest {
 
         String s = commLog.getStringer(value).toString(value);
 
-        assertEquals("{value1='abc', value2=123, optionalNestedValue={value1='def', value2=456, optionalNestedValue=null}}" ,s);
+        assertEquals("{value1='abc', value2=123, optionalNestedValue={value1='def', value2=456, optionalNestedValue=null}}", s);
     }
 
     @Test

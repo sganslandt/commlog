@@ -8,6 +8,15 @@ package nu.ganslandt.util.commlog;
  */
 public interface CommLog {
 
+    static final String SECRET_STRING = "********";
+
+    /**
+     * Logs an empty request with a unique identifier and name.
+     *
+     * @param requestName The name of the request.
+     */
+    void request(String requestName);
+
     /**
      * Logs a request with a unique identifier, name and request object.
      *
@@ -29,18 +38,26 @@ public interface CommLog {
     void response(Object response);
 
     /**
-     * Logs an error. This will result a stacktrace in the error log and an error entry mapped to the preceding request
+     * Logs an error. This will result a stack trace in the error log and an error entry mapped to the preceding request
      * in the comm log, if comm is true,
      *
      * @param t    The exception that occurred.
      * @param comm Whether or not this error is a part of the communication. If true, it will produce an entry in the
-     *             comm log, otherwise only the stacktrace will be logged in the error log.
+     *             comm log, otherwise only the stack trace will be logged in the error log.
      */
     void error(Throwable t, boolean comm);
-
-    void request(String requestName);
 
     void configureStringerForClass(Class clazz, Class<? extends Stringer> stringerClass);
 
     void configureStringerForPackage(String packageName, Class<? extends Stringer> stringerClass);
+
+    /**
+     * Mark a property secret. Secrets will be masked and printed as ********.
+     * <p/>
+     * This request will be propagated to all existing and new Stringers and it's ultimately up to the Stringers to
+     * properly handle secrets.
+     *
+     * @param propertyName -
+     */
+    void addSecret(String propertyName);
 }

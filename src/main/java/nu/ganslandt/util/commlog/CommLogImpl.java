@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,13 +14,15 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class CommLogImpl implements CommLog, StringerSource {
 
-    private static Map<String, CommLogImpl> loggers = new ConcurrentHashMap<String, CommLogImpl>();
+    private static Map<String, CommLogImpl> loggers = new ConcurrentHashMap<>();
 
     private final Logger COMM;
     private final Logger ERROR;
 
     private Map<Class, Stringer> stringerMap;
     private Map<String, Stringer> packageNameStringerMap;
+
+    private Collection<String> globalSecrets;
 
     private ThreadLocal<Request> request;
 
@@ -28,11 +31,12 @@ public class CommLogImpl implements CommLog, StringerSource {
     private CommLogImpl(String name) {
         this.COMM = LoggerFactory.getLogger(name + "-Comm");
         this.ERROR = LoggerFactory.getLogger(name + "-Error");
-        this.request = new ThreadLocal<Request>();
+        this.request = new ThreadLocal<>();
 
-        stringerMap = new ConcurrentHashMap<Class, Stringer>();
-        packageNameStringerMap = new ConcurrentHashMap<String, Stringer>();
+        this.stringerMap = new ConcurrentHashMap<>();
+        this.packageNameStringerMap = new ConcurrentHashMap<>();
 
+        this.globalSecrets = new HashSet<>();
     }
 
     /**
@@ -90,8 +94,6 @@ public class CommLogImpl implements CommLog, StringerSource {
             for (Class c : stringerMap.keySet()) {
                 if (c.isAssignableFrom(obj.getClass())) {
                     stringer = stringerMap.get(c);
-                    //add a reference for this particular subclass - why?
-//                    stringerMap.get().put(obj.getClass(), stringer);
                 }
             }
 
@@ -135,6 +137,18 @@ public class CommLogImpl implements CommLog, StringerSource {
         packageNameStringerMap.put(packageName, getConfiguredStringer(stringerClass));
     }
 
+    @Override
+    public void addSecret(final String propertyName) {
+        globalSecrets.add(propertyName);
+
+        DEFAULT_STRINGER.addSecret(propertyName);
+
+        for (Stringer stringer : stringerMap.values())
+            stringer.addSecret(propertyName);
+        for (Stringer stringer : packageNameStringerMap.values())
+            stringer.addSecret(propertyName);
+    }
+
     private Stringer getConfiguredStringer(Class<? extends Stringer> stringerClass) {
         Stringer stringer = null;
         for (Map.Entry<Class, Stringer> e : stringerMap.entrySet()) {
@@ -144,15 +158,43 @@ public class CommLogImpl implements CommLog, StringerSource {
         }
 
         if (stringer == null) {
-            Constructor<?> constructor = stringerClass.getDeclaredConstructors()[0];
+            Constructor<? extends Stringer> constructor = getPreferredConstructor(stringerClass);
             try {
-                stringer = (Stringer) constructor.newInstance(this);
+                Class<?>[] parameterTypes = constructor.getParameterTypes();
+                if (parameterTypes.length == 1 && parameterTypes[0].equals(StringerSource.class))
+                    stringer = constructor.newInstance(this);
+                else if (parameterTypes.length == 0)
+                    stringer = constructor.newInstance();
+                else
+                    throw new RuntimeException("Don't know how to construct a " + stringerClass.getName());
+
+                for (String secret : globalSecrets)
+                    stringer.addSecret(secret);
             } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
         }
 
         return stringer;
+    }
+
+    private Constructor<? extends Stringer> getPreferredConstructor(final Class<? extends Stringer> stringerClass) {
+        Constructor<? extends Stringer> preferredConstructor = null;
+        try {
+            preferredConstructor = stringerClass.getDeclaredConstructor(StringerSource.class);
+        } catch (NoSuchMethodException ignored) {
+            // moving along
+            try {
+                preferredConstructor = stringerClass.getDeclaredConstructor();
+            } catch (NoSuchMethodException ignored2) {
+                // moving along
+            }
+        }
+
+        if (preferredConstructor == null)
+            throw new RuntimeException("Found neither a no args constructor or one taking a StringerSource.");
+        else
+            return preferredConstructor;
     }
 
     /**

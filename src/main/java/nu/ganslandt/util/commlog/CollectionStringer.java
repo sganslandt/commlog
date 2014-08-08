@@ -33,4 +33,9 @@ public class CollectionStringer implements Stringer {
 
         return builder.toString();
     }
+
+    @Override
+    public void addSecret(final String propertyName) {
+        // Don't know about property names, nothing to do.
+    }
 }
