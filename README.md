@@ -1,6 +1,8 @@
 commlog
 ========
 
+![build-status](https://travis-ci.org/sganslandt/commlog.svg?branch=master)
+
 A simple commlog API, utlizing slf4j to create need comm logs for keeping tracks of requests and responses to/from remote systems.
 
 CommLogImpl.getLog("Name of remote facade") will get you a comm logger that can log your requests and associated responses or errors if that would be the outcome.
