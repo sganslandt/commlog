@@ -23,6 +23,8 @@ public class CommLogImpl implements CommLog, StringerSource {
 
     private ThreadLocal<Request> request;
 
+    private static final Stringer DEFAULT_STRINGER = new ToStringStringer();
+
     private CommLogImpl(String name) {
         this.COMM = LoggerFactory.getLogger(name + "-Comm");
         this.ERROR = LoggerFactory.getLogger(name + "-Error");
@@ -61,7 +63,7 @@ public class CommLogImpl implements CommLog, StringerSource {
     public Stringer getStringer(Object obj) {
 
         if (obj == null)
-            return new ToStringStringer();
+            return DEFAULT_STRINGER;
 
         Stringer stringer = getSpecializedStringerFor(obj);
         if (stringer != null)
@@ -72,7 +74,7 @@ public class CommLogImpl implements CommLog, StringerSource {
             return stringer;
 
         // fall back to basics
-        return new ToStringStringer();
+        return DEFAULT_STRINGER;
     }
 
     private Stringer getSpecializedStringerFor(Object obj) {
