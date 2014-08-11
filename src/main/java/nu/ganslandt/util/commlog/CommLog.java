@@ -35,7 +35,7 @@ public interface CommLog {
      *
      * @param response The response object.
      */
-    void response(Object response);
+    <T> T response(T response);
 
     /**
      * Logs an error. This will result a stack trace in the error log and an error entry mapped to the preceding request
@@ -45,7 +45,7 @@ public interface CommLog {
      * @param comm Whether or not this error is a part of the communication. If true, it will produce an entry in the
      *             comm log, otherwise only the stack trace will be logged in the error log.
      */
-    void error(Throwable t, boolean comm);
+    <T extends Throwable> T error(T t, boolean comm);
 
     void configureStringerForClass(Class clazz, Class<? extends Stringer> stringerClass);
 

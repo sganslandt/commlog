@@ -222,7 +222,7 @@ public class CommLogImpl implements CommLog, StringerSource {
      * @inheritDoc
      */
     @Override
-    public void response(Object response) {
+    public <T> T response(T response) {
         Request request = this.request.get();
         String uuid;
         String requestName;
@@ -237,13 +237,15 @@ public class CommLogImpl implements CommLog, StringerSource {
         }
 
         COMM.info("Response: [{}] {}({})", new Object[]{uuid, requestName, getStringer(response).toString(response)});
+
+        return response;
     }
 
     /**
      * @inheritDoc
      */
     @Override
-    public void error(Throwable t, boolean comm) {
+    public <T extends Throwable> T error(T t, boolean comm) {
         String uuid = null;
         String requestName = null;
 
@@ -259,6 +261,8 @@ public class CommLogImpl implements CommLog, StringerSource {
         }
 
         ERROR.error("Error: [{}]", uuid, t);
+
+        return t;
     }
 
 
