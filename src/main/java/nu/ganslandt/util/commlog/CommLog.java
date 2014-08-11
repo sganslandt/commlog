@@ -38,6 +38,13 @@ public interface CommLog {
     <T> T response(T response);
 
     /**
+     * Logs a response message as an error.
+     *
+     * @param response    The error message that was returned.
+     */
+    <T> T error(T response);
+
+    /**
      * Logs an error. This will result a stack trace in the error log and an error entry mapped to the preceding request
      * in the comm log, if comm is true,
      *
