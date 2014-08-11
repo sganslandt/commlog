@@ -1,6 +1,7 @@
 package nu.ganslandt.util.commlog;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -23,6 +24,9 @@ public class ReflectingPropertyStringer implements Stringer {
 
         for (Field f : obj.getClass().getDeclaredFields()) {
             String value;
+
+            if (Modifier.isTransient(f.getModifiers()))
+                continue;
 
             try {
                 f.setAccessible(true);

@@ -4,6 +4,7 @@ class ValueClass {
     private String value1;
     private Integer value2;
     private ValueClass optionalNestedValue;
+    private transient boolean transientField = false;
 
     public ValueClass(String value1, Integer value2) {
         this.value1 = value1;
