@@ -54,6 +54,15 @@ public interface CommLog {
      */
     <T extends Throwable> T error(T t, boolean comm);
 
+    /**
+     * Logs a response and an error. This will result a stack trace in the error log and an error entry mapped to the preceding request
+     * in the comm log with the response.
+     *
+     * @param t         The exception that occurred.
+     * @param response  The error message that was returned.
+     */
+    <R, T extends Throwable> R error(T t, R response);
+
     void configureStringerForClass(Class clazz, Class<? extends Stringer> stringerClass);
 
     void configureStringerForPackage(String packageName, Class<? extends Stringer> stringerClass);
