@@ -288,5 +288,28 @@ public class CommLogImpl implements CommLog, StringerSource {
         return t;
     }
 
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public <R, T extends Throwable> R error(T t, R response) {
+        String uuid = null;
+        String requestName = null;
 
+        Request request = this.request.get();
+        if (request != null) {
+            uuid = request.getUUID();
+            requestName = request.getRequestName();
+            this.request.remove();
+        } else {
+            uuid = "";
+            requestName = "";
+        }
+
+        COMM.error("Error: [{}] {}({})", new Object[]{uuid, requestName, getStringer(response).toString(response)});
+
+        ERROR.error("Error: [{}]", uuid, t);
+
+        return response;
+    }
 }
