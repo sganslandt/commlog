@@ -22,29 +22,34 @@ public class ReflectingPropertyStringer implements Stringer {
 
         sb.append("{");
 
-        for (Field f : obj.getClass().getDeclaredFields()) {
-            String value;
+        Class<?> clazz = obj.getClass();
+        while (!clazz.equals(Object.class)) {
 
-            if (Modifier.isTransient(f.getModifiers()))
-                continue;
+            for (Field f : clazz.getDeclaredFields()) {
+                String value;
 
-            try {
-                f.setAccessible(true);
-                if (globalSecrets.contains(f.getName()))
-                    value = f.getName() + "=" + CommLog.SECRET_STRING;
-                else if (f.get(obj) != null)
-                    value = f.getName() + "=" + source.getStringer(f.get(obj)).toString(f.get(obj));
-                else
-                    value = f.getName() + "=" + null;
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-                value = "###ERROR###";
+                if (Modifier.isTransient(f.getModifiers()))
+                    continue;
+
+                try {
+                    f.setAccessible(true);
+                    if (globalSecrets.contains(f.getName()))
+                        value = f.getName() + "=" + CommLog.SECRET_STRING;
+                    else if (f.get(obj) != null)
+                        value = f.getName() + "=" + source.getStringer(f.get(obj)).toString(f.get(obj));
+                    else
+                        value = f.getName() + "=" + null;
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                    value = "###ERROR###";
+                }
+
+                sb.append(value).append(", ");
             }
-
-            sb.append(value).append(", ");
+            clazz = clazz.getSuperclass();
         }
 
-        if (obj.getClass().getDeclaredFields().length > 0)
+        if (sb.length() > 1)
             sb.delete(sb.length() - 2, sb.length());
         sb.append("}");
         return sb.toString();
