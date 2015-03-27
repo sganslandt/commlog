@@ -110,6 +110,16 @@ public class CommLogTest {
     }
 
     @Test
+    public void testReflectingPropertStringer_canLogEnums(){
+        commLog.configureStringerForPackage("nu.ganslandt.util.commlog", ReflectingPropertyStringer.class);
+
+        String s = commLog.getStringer(Foo.BAR).toString(Foo.BAR);
+
+        assertEquals("BAR", s);
+
+    }
+
+    @Test
     public void testNullStringer() {
         String s = commLog.getStringer(null).toString(null);
 

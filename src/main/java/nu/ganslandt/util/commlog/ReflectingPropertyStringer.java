@@ -18,6 +18,9 @@ public class ReflectingPropertyStringer implements Stringer {
 
     public String toString(Object obj) {
 
+        if(obj instanceof Enum)
+            return obj.toString();
+
         StringBuilder sb = new StringBuilder();
 
         sb.append("{");
