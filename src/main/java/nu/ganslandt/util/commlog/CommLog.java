@@ -76,4 +76,16 @@ public interface CommLog {
      * @param propertyName -
      */
     void addSecret(String propertyName);
+
+    /**
+     * Set a threshold for how deep within objects the Stringers should look for additional properties to include.
+     *
+     * After this threshold has been reach, a dummy value will be returned instead of the actual value.
+     *
+     * This is to prevent StackOverflows when Stringing objects that either reference themselves or are just to
+     * big graphs to be able to conveniently handle.
+     *
+     * @param maxPropertyDepth -
+     */
+    void setMaxPropertyDepth(int maxPropertyDepth);
 }

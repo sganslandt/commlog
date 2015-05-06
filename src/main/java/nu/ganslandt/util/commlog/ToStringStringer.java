@@ -1,9 +1,13 @@
 package nu.ganslandt.util.commlog;
 
-public class ToStringStringer implements Stringer {
+public class ToStringStringer extends Stringer {
+
+    public ToStringStringer(int maxPropertyDepth) {
+        super(maxPropertyDepth);
+    }
 
     @Override
-    public String toString(Object obj) {
+    String doStringify(Object obj, int level) {
         if (obj == null)
             return "null";
         else if (obj instanceof String)
