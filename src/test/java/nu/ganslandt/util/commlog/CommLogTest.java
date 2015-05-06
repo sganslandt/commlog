@@ -247,10 +247,35 @@ public class CommLogTest {
         System.out.println(commLog.getStringer(testClass).toString(testClass));
     }
 
+    @Test
+    public void testFoulStringer_exceptionDoesntPropagate() {
+        commLog.configureStringerForClass(TestClass.class, FoulStringer.class);
+
+        commLog.request("test", new TestClass());
+        commLog.response(new TestClass());
+    }
+
     private static class TestClass {
         public Object data;
 
         public void setData(Object data) { this.data = data; }
+    }
+
+    private static class FoulStringer extends Stringer {
+
+        FoulStringer() {
+            super(1000);
+        }
+
+        @Override
+        String doStringify(final Object obj, final int level) {
+            throw new RuntimeException("Failure!!!");
+        }
+
+        @Override
+        void addSecret(final String propertyName) {
+
+        }
     }
 
 }

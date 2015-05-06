@@ -9,7 +9,11 @@ public abstract class Stringer {
     }
 
     String toString(Object obj) {
-        return toString(obj, 0);
+        try {
+            return toString(obj, 0);
+        } catch (Throwable t) {
+            return "Failed to Stringify an instance of " + obj.getClass() + " (" + t.toString() + ")";
+        }
     }
 
     String toString(Object obj, int level) {
