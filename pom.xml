@@ -6,7 +6,7 @@
 
     <groupId>nu.ganslandt.util</groupId>
     <artifactId>commlog</artifactId>
-    <version>1.3-SNAPSHOT</version>
+    <version>1.3.1</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
