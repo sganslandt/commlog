@@ -4,8 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URI;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
@@ -107,7 +106,7 @@ public class CommLogTest {
 
     @Test
     public void testMapString_withNullEntry() {
-        LinkedHashMap<String, String> linkedHashMap = new LinkedHashMap<String, String>();
+        LinkedHashMap<String, String> linkedHashMap = new LinkedHashMap<>();
         linkedHashMap.put("value", null);
 
         String s = commLog.getStringer(linkedHashMap).toString(linkedHashMap);
@@ -117,7 +116,7 @@ public class CommLogTest {
 
     @Test
     public void testMapStringer_withMapContent() {
-        LinkedHashMap<String, LinkedHashMap<String, String>> linkedHashMap = new LinkedHashMap<String, LinkedHashMap<String, String>>();
+        LinkedHashMap<String, LinkedHashMap<String, String>> linkedHashMap = new LinkedHashMap<>();
         linkedHashMap.put("value", new LinkedHashMap<String, String>());
 
         String s = commLog.getStringer(linkedHashMap).toString(linkedHashMap);
@@ -212,6 +211,71 @@ public class CommLogTest {
 
         String s = commLog.getStringer(uri).toString(uri);
         assertEquals("http://host/path?queryParam=paramValue&queryParam2=paramValue2", s);
+    }
+
+    @Test
+    public void testCollectionStringer_doesntStackOverflow() {
+        List<Object> list = new LinkedList<>();
+        list.add(list);
+
+        commLog.getStringer(list).toString(list);
+    }
+
+    @Test
+    public void testArrayStringer_doesntStackOverflow() {
+        Object[] array = new Object[1];
+        array[0] = array;
+
+        commLog.getStringer(array).toString(array);
+    }
+
+    @Test
+    public void testMapStringer_doesntStackOverflow() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("map", map);
+
+        commLog.getStringer(map).toString(map);
+    }
+
+    @Test
+    public void testReflectionPropertyStringer_doesntStackOverflow() {
+        TestClass testClass = new TestClass();
+        testClass.setData(testClass);
+
+        commLog.configureStringerForClass(TestClass.class, ReflectingPropertyStringer.class);
+
+        System.out.println(commLog.getStringer(testClass).toString(testClass));
+    }
+
+    @Test
+    public void testFoulStringer_exceptionDoesntPropagate() {
+        commLog.configureStringerForClass(TestClass.class, FoulStringer.class);
+
+        commLog.request("test", new TestClass());
+        commLog.response(new TestClass());
+    }
+
+    private static class TestClass {
+        public Object data;
+
+        public void setData(Object data) { this.data = data; }
+    }
+
+    private static class FoulStringer extends Stringer {
+
+        FoulStringer() {
+            super(1000);
+        }
+
+        @Override
+        String doStringify(final Object obj, final int level) {
+            throw new RuntimeException("Failure!!!");
+        }
+
+        @Override
+        void addSecret(final String propertyName) {
+
+        }
     }
 
 }

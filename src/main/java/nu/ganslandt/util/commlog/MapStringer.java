@@ -4,19 +4,20 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 
-public class MapStringer implements Stringer {
+public class MapStringer extends Stringer {
 
     private final StringerSource source;
 
     private Collection<String> globalSecrets;
 
-    public MapStringer(StringerSource source) {
+    public MapStringer(StringerSource source, int maxPropertyDepth) {
+        super(maxPropertyDepth);
         this.source = source;
         this.globalSecrets = new HashSet<>();
     }
 
     @Override
-    public String toString(Object object) {
+    String doStringify(Object object, int level) {
 
         Map map;
 
@@ -29,14 +30,14 @@ public class MapStringer implements Stringer {
 
         builder.append("{");
         for (Object key : map.keySet()) {
-            builder.append(source.getStringer(key).toString(key));
+            builder.append(source.getStringer(key).toString(key, level));
             builder.append(": ");
             if (globalSecrets.contains(key)) {
                 builder.append(CommLog.SECRET_STRING);
                 builder.append(", ");
             } else {
                 Object entry = map.get(key);
-                builder.append(source.getStringer(entry).toString(entry));
+                builder.append(source.getStringer(entry).toString(entry, level));
                 builder.append(", ");
             }
         }
