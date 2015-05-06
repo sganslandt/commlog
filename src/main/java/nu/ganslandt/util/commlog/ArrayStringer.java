@@ -8,30 +8,31 @@ public class ArrayStringer extends Stringer {
 
     private final CollectionStringer collectionStringer;
 
-    public ArrayStringer(StringerSource source) {
-        collectionStringer = new CollectionStringer(source);
+    public ArrayStringer(StringerSource source, int maxPropertyDepth) {
+        super(maxPropertyDepth);
+        collectionStringer = new CollectionStringer(source, maxPropertyDepth);
     }
 
     @Override
-    String doStringify(Object obj) {
+    String doStringify(Object obj, int level) {
         if (obj.getClass().equals(char[].class))
-            return collectionStringer.toString(buildCollection((char[]) obj));
+            return collectionStringer.toString(buildCollection((char[]) obj), level);
         if (obj.getClass().equals(byte[].class))
-            return collectionStringer.toString(buildCollection((byte[]) obj));
+            return collectionStringer.toString(buildCollection((byte[]) obj), level);
         if (obj.getClass().equals(short[].class))
-            return collectionStringer.toString(buildCollection((short[]) obj));
+            return collectionStringer.toString(buildCollection((short[]) obj), level);
         if (obj.getClass().equals(int[].class))
-            return collectionStringer.toString(buildCollection((int[]) obj));
+            return collectionStringer.toString(buildCollection((int[]) obj), level);
         if (obj.getClass().equals(long[].class))
-            return collectionStringer.toString(buildCollection((long[]) obj));
+            return collectionStringer.toString(buildCollection((long[]) obj), level);
         if (obj.getClass().equals(float[].class))
-            return collectionStringer.toString(buildCollection((float[]) obj));
+            return collectionStringer.toString(buildCollection((float[]) obj), level);
         if (obj.getClass().equals(double[].class))
-            return collectionStringer.toString(buildCollection((double[]) obj));
+            return collectionStringer.toString(buildCollection((double[]) obj), level);
         if (obj.getClass().equals(boolean[].class))
-            return collectionStringer.toString(buildCollection((boolean[]) obj));
+            return collectionStringer.toString(buildCollection((boolean[]) obj), level);
 
-        return collectionStringer.toString(Arrays.asList((Object[]) obj));
+        return collectionStringer.toString(Arrays.asList((Object[]) obj), level);
     }
 
     private Collection buildCollection(char[] array) {

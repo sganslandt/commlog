@@ -4,11 +4,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URI;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class CommLogTest {
 
@@ -111,7 +110,7 @@ public class CommLogTest {
     }
 
     @Test
-    public void testReflectingPropertyStringer_canLogEnums(){
+    public void testReflectingPropertyStringer_canLogEnums() {
         commLog.configureStringerForPackage("nu.ganslandt.util.commlog", ReflectingPropertyStringer.class);
 
         String s = commLog.getStringer(Enum.FAILURE).toString(Enum.FAILURE);
@@ -140,7 +139,7 @@ public class CommLogTest {
 
     @Test
     public void testMapString_withNullEntry() {
-        LinkedHashMap<String, String> linkedHashMap = new LinkedHashMap<String, String>();
+        LinkedHashMap<String, String> linkedHashMap = new LinkedHashMap<>();
         linkedHashMap.put("value", null);
 
         String s = commLog.getStringer(linkedHashMap).toString(linkedHashMap);
@@ -150,7 +149,7 @@ public class CommLogTest {
 
     @Test
     public void testMapStringer_withMapContent() {
-        LinkedHashMap<String, LinkedHashMap<String, String>> linkedHashMap = new LinkedHashMap<String, LinkedHashMap<String, String>>();
+        LinkedHashMap<String, LinkedHashMap<String, String>> linkedHashMap = new LinkedHashMap<>();
         linkedHashMap.put("value", new LinkedHashMap<String, String>());
 
         String s = commLog.getStringer(linkedHashMap).toString(linkedHashMap);
@@ -266,6 +265,41 @@ public class CommLogTest {
         assertEquals("{value1='value', value2=Failed to Stringify an instance of class java.lang.Integer (java.lang.RuntimeException: Failure!!!), optionalNestedValue=null}", s);
     }
 
+    public void testCollectionStringer_doesntStackOverflow() {
+        List<Object> list = new LinkedList<>();
+        list.add(list);
+
+        commLog.getStringer(list).toString(list);
+    }
+
+    @Test
+    public void testArrayStringer_doesntStackOverflow() {
+        Object[] array = new Object[1];
+        array[0] = array;
+
+        commLog.getStringer(array).toString(array);
+    }
+
+    @Test
+    public void testMapStringer_doesntStackOverflow() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("map", map);
+
+        commLog.getStringer(map).toString(map);
+    }
+
+    @Test
+    public void testReflectionPropertyStringer_doesntStackOverflow() {
+        TestClass testClass = new TestClass();
+        testClass.setData(testClass);
+
+        commLog.configureStringerForClass(TestClass.class, ReflectingPropertyStringer.class);
+
+        String string = commLog.getStringer(testClass).toString(testClass);
+        System.out.println(string);
+        assertTrue(!string.contains("java.lang.StackOverflowError"));
+    }
+
     private static class TestClass {
         private Object data;
 
@@ -282,10 +316,14 @@ public class CommLogTest {
         }
     }
 
-    public static class FoulStringer extends Stringer {
+    private static class FoulStringer extends Stringer {
+
+        FoulStringer(final StringerSource source, final int maxPropertyDepth) {
+            super(maxPropertyDepth);
+        }
 
         @Override
-        String doStringify(final Object obj) {
+        String doStringify(final Object obj, final int level) {
             throw new RuntimeException("Failure!!!");
         }
 

@@ -6,12 +6,13 @@ public class CollectionStringer extends Stringer {
 
     private StringerSource source;
 
-    public CollectionStringer(StringerSource source) {
+    public CollectionStringer(StringerSource source, int maxPropertyDepth) {
+        super(maxPropertyDepth);
         this.source = source;
     }
 
     @Override
-    String doStringify(Object object) {
+    String doStringify(Object object, int level) {
         Collection collection;
 
         if (object instanceof Collection)
@@ -23,7 +24,7 @@ public class CollectionStringer extends Stringer {
 
         builder.append("[");
         for (Object item : collection) {
-            builder.append(source.getStringer(item).toString(item));
+            builder.append(source.getStringer(item).toString(item, level));
             builder.append(", ");
         }
 

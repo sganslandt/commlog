@@ -11,14 +11,14 @@ public class ReflectingPropertyStringer extends Stringer {
 
     private Collection<String> globalSecrets;
 
-    protected ReflectingPropertyStringer(StringerSource source) {
+    protected ReflectingPropertyStringer(StringerSource source, int maxPropertyDepth) {
+        super(maxPropertyDepth);
         this.source = source;
         this.globalSecrets = new HashSet<>();
     }
 
     @Override
-    String doStringify(Object obj) {
-
+    String doStringify(Object obj, int level) {
         StringBuilder sb = new StringBuilder();
 
         sb.append("{");
@@ -37,7 +37,7 @@ public class ReflectingPropertyStringer extends Stringer {
                     if (globalSecrets.contains(f.getName()))
                         value = f.getName() + "=" + CommLog.SECRET_STRING;
                     else if (f.get(obj) != null)
-                        value = f.getName() + "=" + source.getStringer(f.get(obj)).toString(f.get(obj));
+                        value = f.getName() + "=" + source.getStringer(f.get(obj)).toString(f.get(obj), level);
                     else
                         value = f.getName() + "=" + null;
                 } catch (IllegalAccessException e) {
@@ -46,6 +46,7 @@ public class ReflectingPropertyStringer extends Stringer {
                 }
 
                 sb.append(value).append(", ");
+
             }
             clazz = clazz.getSuperclass();
         }
