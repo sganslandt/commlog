@@ -90,6 +90,9 @@ public class CommLogImpl implements CommLog, StringerSource {
         if (obj.getClass().isArray())
             return new ArrayStringer(this, maxPropertyDepth);
 
+        if (obj.getClass().isEnum())
+            return new ToStringStringer(maxPropertyDepth);
+
         // try getting based on this class
         Stringer stringer = stringerMap.get(obj.getClass());
 

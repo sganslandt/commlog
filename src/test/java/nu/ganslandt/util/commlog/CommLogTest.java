@@ -98,6 +98,18 @@ public class CommLogTest {
     }
 
     @Test
+    public void testReflectivePropertyStringer_withEnum() {
+        commLog.configureStringerForClass(TestClassWithEnum.class, ReflectingPropertyStringer.class);
+        commLog.configureStringerForClass(Enum.class, ReflectingPropertyStringer.class);
+
+        TestClassWithEnum value = new TestClassWithEnum();
+        value.setTheEnum(Enum.SUCCESS);
+
+        String s = commLog.getStringer(value).toString(value);
+        assertEquals("{theEnum=SUCCESS}", s);
+    }
+
+    @Test
     public void testNullStringer() {
         String s = commLog.getStringer(null).toString(null);
 
@@ -256,9 +268,19 @@ public class CommLogTest {
     }
 
     private static class TestClass {
-        public Object data;
+        private Object data;
 
-        public void setData(Object data) { this.data = data; }
+        public void setData(Object data) {
+            this.data = data;
+        }
+    }
+
+    private static class TestClassWithEnum {
+        private Enum theEnum;
+
+        public void setTheEnum(Enum theEnum) {
+            this.theEnum = theEnum;
+        }
     }
 
     private static class FoulStringer extends Stringer {
