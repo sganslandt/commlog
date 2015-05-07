@@ -254,6 +254,17 @@ public class CommLogTest {
         commLog.response(new TestClass());
     }
 
+    @Test
+    public void testFoulStringer_producesInformativeMessage() {
+        commLog.configureStringerForClass(ValueClass.class, ReflectingPropertyStringer.class);
+        commLog.configureStringerForClass(Integer.class, FoulStringer.class);
+
+        ValueClass value = new ValueClass("value", 2);
+
+        String s = commLog.getStringer(value).toString(value);
+        assertEquals("{value1='value', value2=Failed to Stringify an instance of class java.lang.Integer (java.lang.RuntimeException: Failure!!!), optionalNestedValue=null}", s);
+    }
+
     private static class TestClass {
         private Object data;
 
