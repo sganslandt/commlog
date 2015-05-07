@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 
@@ -15,7 +16,7 @@ public class CommLogTest {
 
     @Before
     public void setup() {
-        commLog = (CommLogImpl) CommLogImpl.getLog("TestLog");
+        commLog = (CommLogImpl) CommLogImpl.getLog(UUID.randomUUID().toString());
         commLog.addSecret("secretProperty"); // If the secret doesn't show up anywhere, nothing should change
     }
 
