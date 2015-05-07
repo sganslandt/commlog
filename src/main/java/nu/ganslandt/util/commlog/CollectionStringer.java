@@ -2,17 +2,16 @@ package nu.ganslandt.util.commlog;
 
 import java.util.Collection;
 
-public class CollectionStringer extends Stringer {
+public class CollectionStringer implements Stringer {
 
     private StringerSource source;
 
-    public CollectionStringer(StringerSource source, int maxPropertyDepth) {
-        super(maxPropertyDepth);
+    public CollectionStringer(StringerSource source) {
         this.source = source;
     }
 
     @Override
-    String doStringify(Object object, int level) {
+    public String toString(Object object) {
         Collection collection;
 
         if (object instanceof Collection)
@@ -24,7 +23,7 @@ public class CollectionStringer extends Stringer {
 
         builder.append("[");
         for (Object item : collection) {
-            builder.append(source.getStringer(item).toString(item, level));
+            builder.append(source.getStringer(item).toString(item));
             builder.append(", ");
         }
 

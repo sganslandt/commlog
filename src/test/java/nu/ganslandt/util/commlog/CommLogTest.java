@@ -4,7 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URI;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 
 import static org.junit.Assert.assertEquals;
 
@@ -118,7 +119,7 @@ public class CommLogTest {
 
     @Test
     public void testMapString_withNullEntry() {
-        LinkedHashMap<String, String> linkedHashMap = new LinkedHashMap<>();
+        LinkedHashMap<String, String> linkedHashMap = new LinkedHashMap<String, String>();
         linkedHashMap.put("value", null);
 
         String s = commLog.getStringer(linkedHashMap).toString(linkedHashMap);
@@ -128,7 +129,7 @@ public class CommLogTest {
 
     @Test
     public void testMapStringer_withMapContent() {
-        LinkedHashMap<String, LinkedHashMap<String, String>> linkedHashMap = new LinkedHashMap<>();
+        LinkedHashMap<String, LinkedHashMap<String, String>> linkedHashMap = new LinkedHashMap<String, LinkedHashMap<String, String>>();
         linkedHashMap.put("value", new LinkedHashMap<String, String>());
 
         String s = commLog.getStringer(linkedHashMap).toString(linkedHashMap);
@@ -226,40 +227,6 @@ public class CommLogTest {
     }
 
     @Test
-    public void testCollectionStringer_doesntStackOverflow() {
-        List<Object> list = new LinkedList<>();
-        list.add(list);
-
-        commLog.getStringer(list).toString(list);
-    }
-
-    @Test
-    public void testArrayStringer_doesntStackOverflow() {
-        Object[] array = new Object[1];
-        array[0] = array;
-
-        commLog.getStringer(array).toString(array);
-    }
-
-    @Test
-    public void testMapStringer_doesntStackOverflow() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("map", map);
-
-        commLog.getStringer(map).toString(map);
-    }
-
-    @Test
-    public void testReflectionPropertyStringer_doesntStackOverflow() {
-        TestClass testClass = new TestClass();
-        testClass.setData(testClass);
-
-        commLog.configureStringerForClass(TestClass.class, ReflectingPropertyStringer.class);
-
-        System.out.println(commLog.getStringer(testClass).toString(testClass));
-    }
-
-    @Test
     public void testFoulStringer_exceptionDoesntPropagate() {
         commLog.configureStringerForClass(TestClass.class, FoulStringer.class);
 
@@ -283,19 +250,15 @@ public class CommLogTest {
         }
     }
 
-    private static class FoulStringer extends Stringer {
-
-        FoulStringer() {
-            super(1000);
-        }
+    public static class FoulStringer implements Stringer {
 
         @Override
-        String doStringify(final Object obj, final int level) {
+        public String toString(final Object obj) {
             throw new RuntimeException("Failure!!!");
         }
 
         @Override
-        void addSecret(final String propertyName) {
+        public void addSecret(final String propertyName) {
 
         }
     }

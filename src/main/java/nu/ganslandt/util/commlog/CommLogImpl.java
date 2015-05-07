@@ -24,11 +24,9 @@ public class CommLogImpl implements CommLog, StringerSource {
 
     private Collection<String> globalSecrets;
 
-    private int maxPropertyDepth = 10;
-
     private ThreadLocal<Request> request;
 
-    private Stringer defaultStringer;
+    private static final Stringer DEFAULT_STRINGER = new ToStringStringer();
 
     private CommLogImpl(String name) {
         this.COMM = LoggerFactory.getLogger(name + "-Comm");
@@ -39,8 +37,6 @@ public class CommLogImpl implements CommLog, StringerSource {
         this.packageNameStringerMap = new ConcurrentHashMap<>();
 
         this.globalSecrets = new HashSet<>();
-
-        this.defaultStringer = new ToStringStringer(maxPropertyDepth);
     }
 
     /**
@@ -71,7 +67,7 @@ public class CommLogImpl implements CommLog, StringerSource {
     public Stringer getStringer(Object obj) {
 
         if (obj == null)
-            return defaultStringer;
+            return DEFAULT_STRINGER;
 
         Stringer stringer = getSpecializedStringerFor(obj);
         if (stringer != null)
@@ -82,16 +78,16 @@ public class CommLogImpl implements CommLog, StringerSource {
             return stringer;
 
         // fall back to basics
-        return defaultStringer;
+        return DEFAULT_STRINGER;
     }
 
     private Stringer getSpecializedStringerFor(Object obj) {
 
         if (obj.getClass().isArray())
-            return new ArrayStringer(this, maxPropertyDepth);
+            return new ArrayStringer(this);
 
         if (obj.getClass().isEnum())
-            return new ToStringStringer(maxPropertyDepth);
+            return new ToStringStringer();
 
         // try getting based on this class
         Stringer stringer = stringerMap.get(obj.getClass());
@@ -112,8 +108,8 @@ public class CommLogImpl implements CommLog, StringerSource {
     }
 
     private void initStringerMap() {
-        stringerMap.put(Collection.class, new CollectionStringer(this, maxPropertyDepth));
-        stringerMap.put(Map.class, new MapStringer(this, maxPropertyDepth));
+        stringerMap.put(Collection.class, new CollectionStringer(this));
+        stringerMap.put(Map.class, new MapStringer(this));
     }
 
     /**
@@ -148,18 +144,12 @@ public class CommLogImpl implements CommLog, StringerSource {
     public void addSecret(final String propertyName) {
         globalSecrets.add(propertyName);
 
-        defaultStringer.addSecret(propertyName);
+        DEFAULT_STRINGER.addSecret(propertyName);
 
         for (Stringer stringer : stringerMap.values())
             stringer.addSecret(propertyName);
         for (Stringer stringer : packageNameStringerMap.values())
             stringer.addSecret(propertyName);
-    }
-
-    @Override
-    public void setMaxPropertyDepth(int maxPropertyDepth) {
-        this.maxPropertyDepth = maxPropertyDepth;
-        this.defaultStringer = new ToStringStringer(maxPropertyDepth);
     }
 
     private Stringer getConfiguredStringer(Class<? extends Stringer> stringerClass) {
@@ -174,12 +164,8 @@ public class CommLogImpl implements CommLog, StringerSource {
             Constructor<? extends Stringer> constructor = getPreferredConstructor(stringerClass);
             try {
                 Class<?>[] parameterTypes = constructor.getParameterTypes();
-                if (parameterTypes.length == 2
-                        && parameterTypes[0].equals(StringerSource.class)
-                        && parameterTypes[1].equals(int.class))
-                    stringer = constructor.newInstance(this, maxPropertyDepth);
-                else if (parameterTypes.length == 1)
-                    stringer = constructor.newInstance(maxPropertyDepth);
+                if (parameterTypes.length == 1 && parameterTypes[0].equals(StringerSource.class))
+                    stringer = constructor.newInstance(this);
                 else if (parameterTypes.length == 0)
                     stringer = constructor.newInstance();
                 else
@@ -198,7 +184,7 @@ public class CommLogImpl implements CommLog, StringerSource {
     private Constructor<? extends Stringer> getPreferredConstructor(final Class<? extends Stringer> stringerClass) {
         Constructor<? extends Stringer> preferredConstructor = null;
         try {
-            preferredConstructor = stringerClass.getDeclaredConstructor(StringerSource.class, int.class);
+            preferredConstructor = stringerClass.getDeclaredConstructor(StringerSource.class);
         } catch (NoSuchMethodException ignored) {
             // moving along
             try {

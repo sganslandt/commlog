@@ -5,20 +5,18 @@ import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashSet;
 
-public class ReflectingPropertyStringer extends Stringer {
+public class ReflectingPropertyStringer implements Stringer {
 
     private StringerSource source;
 
     private Collection<String> globalSecrets;
 
-    protected ReflectingPropertyStringer(StringerSource source, int maxPropertyDepth) {
-        super(maxPropertyDepth);
+    protected ReflectingPropertyStringer(StringerSource source) {
         this.source = source;
         this.globalSecrets = new HashSet<>();
     }
 
-    @Override
-    String doStringify(Object obj, int level) {
+    public String toString(Object obj) {
 
         StringBuilder sb = new StringBuilder();
 
@@ -35,7 +33,7 @@ public class ReflectingPropertyStringer extends Stringer {
                 if (globalSecrets.contains(f.getName()))
                     value = f.getName() + "=" + CommLog.SECRET_STRING;
                 else if (f.get(obj) != null)
-                    value = f.getName() + "=" + source.getStringer(f.get(obj)).toString(f.get(obj), level);
+                    value = f.getName() + "=" + source.getStringer(f.get(obj)).toString(f.get(obj));
                 else
                     value = f.getName() + "=" + null;
             } catch (IllegalAccessException e) {
