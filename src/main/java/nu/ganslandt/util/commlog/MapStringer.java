@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 
-public class MapStringer implements Stringer {
+public class MapStringer extends Stringer {
 
     private final StringerSource source;
 
@@ -16,7 +16,7 @@ public class MapStringer implements Stringer {
     }
 
     @Override
-    public String toString(Object object) {
+    String doStringify(Object object) {
 
         Map map;
 

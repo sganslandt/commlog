@@ -2,7 +2,7 @@ package nu.ganslandt.util.commlog;
 
 import java.util.Collection;
 
-public class CollectionStringer implements Stringer {
+public class CollectionStringer extends Stringer {
 
     private StringerSource source;
 
@@ -11,7 +11,7 @@ public class CollectionStringer implements Stringer {
     }
 
     @Override
-    public String toString(Object object) {
+    String doStringify(Object object) {
         Collection collection;
 
         if (object instanceof Collection)

@@ -5,7 +5,7 @@ import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashSet;
 
-public class ReflectingPropertyStringer implements Stringer {
+public class ReflectingPropertyStringer extends Stringer {
 
     private StringerSource source;
 
@@ -16,7 +16,8 @@ public class ReflectingPropertyStringer implements Stringer {
         this.globalSecrets = new HashSet<>();
     }
 
-    public String toString(Object obj) {
+    @Override
+    String doStringify(Object obj) {
 
         StringBuilder sb = new StringBuilder();
 

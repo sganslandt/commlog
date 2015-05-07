@@ -1,9 +1,9 @@
 package nu.ganslandt.util.commlog;
 
-public class ToStringStringer implements Stringer {
+public class ToStringStringer extends Stringer {
 
     @Override
-    public String toString(Object obj) {
+    String doStringify(Object obj) {
         if (obj == null)
             return "null";
         else if (obj instanceof String)

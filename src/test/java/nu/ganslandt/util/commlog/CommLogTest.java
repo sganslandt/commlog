@@ -250,10 +250,10 @@ public class CommLogTest {
         }
     }
 
-    public static class FoulStringer implements Stringer {
+    public static class FoulStringer extends Stringer {
 
         @Override
-        public String toString(final Object obj) {
+        String doStringify(final Object obj) {
             throw new RuntimeException("Failure!!!");
         }
 

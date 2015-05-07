@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class ArrayStringer implements Stringer {
+public class ArrayStringer extends Stringer {
 
     private final CollectionStringer collectionStringer;
 
@@ -13,7 +13,7 @@ public class ArrayStringer implements Stringer {
     }
 
     @Override
-    public String toString(Object obj) {
+    String doStringify(Object obj) {
         if (obj.getClass().equals(char[].class))
             return collectionStringer.toString(buildCollection((char[]) obj));
         if (obj.getClass().equals(byte[].class))
