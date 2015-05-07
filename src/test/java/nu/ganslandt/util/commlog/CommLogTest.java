@@ -89,6 +89,17 @@ public class CommLogTest {
     }
 
     @Test
+    public void testReflectingPropertyStringer_logsSuperClassAttributesWhenSubClassIsLogs() {
+        commLog.configureStringerForClass(SubValueClass.class, ReflectingPropertyStringer.class);
+        SubValueClass value = new SubValueClass("abc", Integer.valueOf(123), Integer.valueOf(11));
+
+        String s = commLog.getStringer(value).toString(value);
+
+        assertEquals("{value3=11, value1='abc', value2=123, optionalNestedValue=null}", s);
+    }
+
+
+    @Test
     public void testReflectingPropertyStringer_getsUsedWhenConfiguredViaPackage() {
         commLog.configureStringerForPackage("nu.ganslandt.util.commlog", ReflectingPropertyStringer.class);
         ValueClass value = new ValueClass("abc", Integer.valueOf(123), new ValueClass("def", Integer.valueOf(456)));
@@ -99,7 +110,16 @@ public class CommLogTest {
     }
 
     @Test
-    public void testReflectivePropertyStringer_withEnum() {
+    public void testReflectingPropertyStringer_canLogEnums(){
+        commLog.configureStringerForPackage("nu.ganslandt.util.commlog", ReflectingPropertyStringer.class);
+
+        String s = commLog.getStringer(Enum.FAILURE).toString(Enum.FAILURE);
+
+        assertEquals("FAILURE", s);
+    }
+
+    @Test
+    public void testReflectingPropertyStringer_withEnum() {
         commLog.configureStringerForClass(TestClassWithEnum.class, ReflectingPropertyStringer.class);
         commLog.configureStringerForClass(Enum.class, ReflectingPropertyStringer.class);
 
