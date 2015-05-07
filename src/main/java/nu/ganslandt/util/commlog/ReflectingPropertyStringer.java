@@ -19,9 +19,6 @@ public class ReflectingPropertyStringer extends Stringer {
     @Override
     String doStringify(Object obj) {
 
-        if(obj instanceof Enum)
-            return obj.toString();
-
         StringBuilder sb = new StringBuilder();
 
         sb.append("{");
