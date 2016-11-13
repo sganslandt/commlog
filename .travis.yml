@@ -1,4 +1,12 @@
 language: java
 jdk:
-  - oraclejdk7
-  - openjdk7
+- oraclejdk7
+- openjdk7
+deploy:
+  provider: releases
+  api_key:
+    secure: ZxFXykKOGDyy+SjHYn5YppIdRjmUEtTnElek2XTY6AiobWTro63Ph2IKyQEDuJFnbdUugKfjKQE5mMxkeUXDBxnwk4LawZaEyO0ZuY1xaPgrzExA8j0+yq4WYx7sTNt/UXiC+6NlDyuq00ixc6dC3m53UyC2rENUARVMVyfejgA=
+  file: target/*.jar
+  on:
+    tags: true
+    repo: sganslandt/commlog
