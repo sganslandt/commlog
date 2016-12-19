@@ -7,7 +7,14 @@ deploy:
   api_key:
     secure: ZxFXykKOGDyy+SjHYn5YppIdRjmUEtTnElek2XTY6AiobWTro63Ph2IKyQEDuJFnbdUugKfjKQE5mMxkeUXDBxnwk4LawZaEyO0ZuY1xaPgrzExA8j0+yq4WYx7sTNt/UXiC+6NlDyuq00ixc6dC3m53UyC2rENUARVMVyfejgA=
   file_glob: true
-  file: "target/*.jar"
+  file: target/*.jar
   on:
     tags: true
     repo: sganslandt/commlog
+after_success:
+  - test "${TRAVIS_PULL_REQUEST}" == "false" && test “${TRAVIS_JDK_VERSION}” == “oraclejdk7″ && test "${TRAVIS_TAG}" != "" && mvn deploy --settings travis/settings.xml
+
+env:
+  global:
+  - secure: Pep6suXE3iCoWUwcxrS+WY2vvbq1+2e7gkmAF0vw/vHm/rNWoc4cKv5+aW+X3CIUs1gnEdbvRotue+6FUVppXo7NaO1N9o3IGO3jvF6TSD2K9IwbIqkJ6qTzAw6vGwTfQBgmunNJP6JusVD6pz03uPb42apV7pLGotRzJ/XIhOE=
+  - secure: GbOpUxlJSFOV0Hux5Xmle2Sfw7lMhynLhWACxPa9n41x4qCWBGak7wNroKFhSwY7Pa8IPVfUTLEQVxTGRywSC4cEOlBwhqEvP5mmgf58IwFaQtJp6injGWeLe84mJn95GU3ZBdbwzK1USIf6fx7ll02ANU1gK4NL9KRdIfSMTZo=
