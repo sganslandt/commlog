@@ -26,6 +26,13 @@ public interface CommLog {
     void request(String requestName, Object request);
 
     /**
+     * Logs an informational message using the identifier of the preceding request
+     *
+     * @param message The message to log
+     */
+    void info(String message);
+
+    /**
      * Logs an empty response and maps it to a preceding request.
      */
     void response();

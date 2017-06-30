@@ -214,6 +214,23 @@ public class CommLogImpl implements CommLog, StringerSource {
             return preferredConstructor;
     }
 
+    @Override
+    public void info(String message) {
+        Request request = this.request.get();
+        String uuid;
+        String requestName;
+
+        if (request != null) {
+            uuid = request.getUUID();
+            requestName = request.getRequestName();
+        } else {
+            uuid = "";
+            requestName = "";
+        }
+
+        COMM.info("Info: [{}] {}({})", new Object[]{uuid, requestName, message});
+    }
+
     /**
      * @inheritDoc
      */
