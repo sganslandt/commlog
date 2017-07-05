@@ -122,7 +122,7 @@ public class CommLogImpl implements CommLog, StringerSource {
     @Override
     public void request(String requestName, Object request) {
         this.request.set(new Request(requestName));
-        COMM.info("Request: [{}] {}({})", new Object[]{this.request.get().getUUID(), requestName, getStringer(request).toString(request)});
+        COMM.info("Request: [{}] {}({})", new Object[] { getRequest().getUUID(), requestName, getStringer(request).toString(request) });
     }
 
     /**
@@ -131,7 +131,7 @@ public class CommLogImpl implements CommLog, StringerSource {
     @Override
     public void request(String requestName) {
         this.request.set(new Request(requestName));
-        COMM.info("Request: [{}] {}()", new Object[]{this.request.get().getUUID(), requestName});
+        COMM.info("Request: [{}] {}()", new Object[] { getRequest().getUUID(), requestName });
     }
 
     @Override
@@ -216,19 +216,8 @@ public class CommLogImpl implements CommLog, StringerSource {
 
     @Override
     public void info(String message) {
-        Request request = this.request.get();
-        String uuid;
-        String requestName;
-
-        if (request != null) {
-            uuid = request.getUUID();
-            requestName = request.getRequestName();
-        } else {
-            uuid = "";
-            requestName = "";
-        }
-
-        COMM.info("Info: [{}] {}({})", new Object[]{uuid, requestName, message});
+        Request request = getRequest();
+        COMM.info("Info: [{}] {}({})", new Object[] { request.getUUID(), request.getRequestName(), message });
     }
 
     /**
@@ -236,20 +225,9 @@ public class CommLogImpl implements CommLog, StringerSource {
      */
     @Override
     public void response() {
-        Request request = this.request.get();
-        String uuid;
-        String requestName;
-
-        if (request != null) {
-            uuid = request.getUUID();
-            requestName = request.getRequestName();
-            this.request.remove();
-        } else {
-            uuid = "";
-            requestName = "";
-        }
-
-        COMM.info("Response: [{}] {}({})", new Object[]{uuid, requestName, "void"});
+        Request request = getRequest();
+        COMM.info("Response: [{}] {}({})", new Object[] { request.getUUID(), request.getRequestName(), "void" });
+        clearRequest();
     }
 
     /**
@@ -257,21 +235,10 @@ public class CommLogImpl implements CommLog, StringerSource {
      */
     @Override
     public <T> T response(T response) {
-        Request request = this.request.get();
-        String uuid;
-        String requestName;
-
-        if (request != null) {
-            uuid = request.getUUID();
-            requestName = request.getRequestName();
-            this.request.remove();
-        } else {
-            uuid = "";
-            requestName = "";
-        }
-
-        COMM.info("Response: [{}] {}({})", new Object[]{uuid, requestName, getStringer(response).toString(response)});
-
+        Request request = getRequest();
+        COMM.info("Response: [{}] {}({})",
+                  new Object[] { request.getUUID(), request.getRequestName(), getStringer(response).toString(response) });
+        clearRequest();
         return response;
     }
 
@@ -280,21 +247,10 @@ public class CommLogImpl implements CommLog, StringerSource {
      */
     @Override
     public <T> T error(T response) {
-        Request request = this.request.get();
-        String uuid;
-        String requestName;
-
-        if (request != null) {
-            uuid = request.getUUID();
-            requestName = request.getRequestName();
-            this.request.remove();
-        } else {
-            uuid = "";
-            requestName = "";
-        }
-
-        COMM.error("Error: [{}] {}({})", new Object[]{uuid, requestName, getStringer(response).toString(response)});
-
+        Request request = getRequest();
+        COMM.error("Error: [{}] {}({})",
+                   new Object[] { request.getUUID(), request.getRequestName(), getStringer(response).toString(response) });
+        clearRequest();
         return response;
     }
 
@@ -303,22 +259,14 @@ public class CommLogImpl implements CommLog, StringerSource {
      */
     @Override
     public <T extends Throwable> T error(T t, boolean comm) {
-        String uuid = null;
-        String requestName = null;
-
-        Request request = this.request.get();
-        if (request != null) {
-            uuid = request.getUUID();
-            requestName = request.getRequestName();
-        }
-
+        Request request = getRequest();
         if (comm) {
-            COMM.error("Error: [{}] {}({})", new Object[]{uuid, requestName, t.toString()});
-            this.request.remove();
+            COMM.error("Error: [{}] {}({})", new Object[] { request.getUUID(), request.getRequestName(), t.toString() });
         }
-
-        ERROR.error("Error: [{}]", uuid, t);
-
+        ERROR.error("Error: [{}]", request.getUUID(), t);
+        if (comm) {
+            clearRequest();
+        }
         return t;
     }
 
@@ -327,23 +275,22 @@ public class CommLogImpl implements CommLog, StringerSource {
      */
     @Override
     public <R, T extends Throwable> R error(T t, R response) {
-        String uuid = null;
-        String requestName = null;
-
-        Request request = this.request.get();
-        if (request != null) {
-            uuid = request.getUUID();
-            requestName = request.getRequestName();
-            this.request.remove();
-        } else {
-            uuid = "";
-            requestName = "";
-        }
-
-        COMM.error("Error: [{}] {}({})", new Object[]{uuid, requestName, getStringer(response).toString(response)});
-
-        ERROR.error("Error: [{}]", uuid, t);
-
+        Request request = getRequest();
+        COMM.error("Error: [{}] {}({})",
+                   new Object[] { request.getUUID(), request.getRequestName(), getStringer(response).toString(response) });
+        ERROR.error("Error: [{}]", request.getRequestName(), t);
+        clearRequest();
         return response;
+    }
+
+    private void clearRequest() {
+        if (request.get() != null) {
+            request.remove();
+        }
+    }
+
+    private Request getRequest() {
+        Request request = this.request.get();
+        return request != null ? request : Request.empty();
     }
 }
