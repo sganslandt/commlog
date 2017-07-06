@@ -300,6 +300,17 @@ public class CommLogTest {
         assertTrue(!string.contains("java.lang.StackOverflowError"));
     }
 
+    @Test
+    public void testResponseWithoutRequest_logsWithoutExceptions() {
+        commLog.response();
+        commLog.response(new TestClass());
+        commLog.response("Hello There");
+
+        commLog.info("yes");
+
+        commLog.error("foobar");
+    }
+
     private static class TestClass {
         private Object data;
 
