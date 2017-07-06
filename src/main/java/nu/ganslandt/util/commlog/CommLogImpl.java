@@ -33,7 +33,13 @@ public class CommLogImpl implements CommLog, StringerSource {
     private CommLogImpl(String name) {
         this.COMM = LoggerFactory.getLogger(name + "-Comm");
         this.ERROR = LoggerFactory.getLogger(name + "-Error");
-        this.request = new ThreadLocal<>();
+        this.request = new ThreadLocal<Request>() {
+
+            protected Request initialValue() {
+                return Request.empty();
+            }
+
+        };
 
         this.stringerMap = new ConcurrentHashMap<>();
         this.packageNameStringerMap = new ConcurrentHashMap<>();
@@ -122,7 +128,7 @@ public class CommLogImpl implements CommLog, StringerSource {
     @Override
     public void request(String requestName, Object request) {
         this.request.set(new Request(requestName));
-        COMM.info("Request: [{}] {}({})", new Object[] { getRequest().getUUID(), requestName, getStringer(request).toString(request) });
+        COMM.info("Request: [{}] {}({})", new Object[]{this.request.get().getUUID(), requestName, getStringer(request).toString(request)});
     }
 
     /**
@@ -131,7 +137,7 @@ public class CommLogImpl implements CommLog, StringerSource {
     @Override
     public void request(String requestName) {
         this.request.set(new Request(requestName));
-        COMM.info("Request: [{}] {}()", new Object[] { getRequest().getUUID(), requestName });
+        COMM.info("Request: [{}] {}()", new Object[]{this.request.get().getUUID(), requestName});
     }
 
     @Override
@@ -216,8 +222,8 @@ public class CommLogImpl implements CommLog, StringerSource {
 
     @Override
     public void info(String message) {
-        Request request = getRequest();
-        COMM.info("Info: [{}] {}({})", new Object[] { request.getUUID(), request.getRequestName(), message });
+        Request request = this.request.get();
+        COMM.info("Info: [{}] {}({})", new Object[]{request.getUUID(), request.getRequestName(), message});
     }
 
     /**
@@ -225,9 +231,9 @@ public class CommLogImpl implements CommLog, StringerSource {
      */
     @Override
     public void response() {
-        Request request = getRequest();
-        COMM.info("Response: [{}] {}({})", new Object[] { request.getUUID(), request.getRequestName(), "void" });
-        clearRequest();
+        Request request = this.request.get();
+        COMM.info("Response: [{}] {}({})", new Object[]{request.getUUID(), request.getRequestName(), "void"});
+        this.request.remove();
     }
 
     /**
@@ -235,10 +241,10 @@ public class CommLogImpl implements CommLog, StringerSource {
      */
     @Override
     public <T> T response(T response) {
-        Request request = getRequest();
+        Request request = this.request.get();
         COMM.info("Response: [{}] {}({})",
-                  new Object[] { request.getUUID(), request.getRequestName(), getStringer(response).toString(response) });
-        clearRequest();
+                new Object[]{request.getUUID(), request.getRequestName(), getStringer(response).toString(response)});
+        this.request.remove();
         return response;
     }
 
@@ -247,10 +253,10 @@ public class CommLogImpl implements CommLog, StringerSource {
      */
     @Override
     public <T> T error(T response) {
-        Request request = getRequest();
+        Request request = this.request.get();
         COMM.error("Error: [{}] {}({})",
-                   new Object[] { request.getUUID(), request.getRequestName(), getStringer(response).toString(response) });
-        clearRequest();
+                new Object[]{request.getUUID(), request.getRequestName(), getStringer(response).toString(response)});
+        this.request.remove();
         return response;
     }
 
@@ -259,13 +265,13 @@ public class CommLogImpl implements CommLog, StringerSource {
      */
     @Override
     public <T extends Throwable> T error(T t, boolean comm) {
-        Request request = getRequest();
+        Request request = this.request.get();
         if (comm) {
-            COMM.error("Error: [{}] {}({})", new Object[] { request.getUUID(), request.getRequestName(), t.toString() });
+            COMM.error("Error: [{}] {}({})", new Object[]{request.getUUID(), request.getRequestName(), t.toString()});
         }
         ERROR.error("Error: [{}]", request.getUUID(), t);
         if (comm) {
-            clearRequest();
+            this.request.remove();
         }
         return t;
     }
@@ -275,22 +281,12 @@ public class CommLogImpl implements CommLog, StringerSource {
      */
     @Override
     public <R, T extends Throwable> R error(T t, R response) {
-        Request request = getRequest();
+        Request request = this.request.get();
         COMM.error("Error: [{}] {}({})",
-                   new Object[] { request.getUUID(), request.getRequestName(), getStringer(response).toString(response) });
+                new Object[]{request.getUUID(), request.getRequestName(), getStringer(response).toString(response)});
         ERROR.error("Error: [{}]", request.getRequestName(), t);
-        clearRequest();
+        this.request.remove();
         return response;
     }
 
-    private void clearRequest() {
-        if (request.get() != null) {
-            request.remove();
-        }
-    }
-
-    private Request getRequest() {
-        Request request = this.request.get();
-        return request != null ? request : Request.empty();
-    }
 }
