@@ -29,8 +29,9 @@ public class ReflectingPropertyStringer extends Stringer {
             for (Field f : clazz.getDeclaredFields()) {
                 String value;
 
-                if (Modifier.isTransient(f.getModifiers()))
+                if (Modifier.isTransient(f.getModifiers()) || Modifier.isStatic(f.getModifiers())) {
                     continue;
+                }
 
                 try {
                     f.setAccessible(true);
